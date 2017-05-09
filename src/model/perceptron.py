@@ -5,13 +5,22 @@ import logging
 
 import numpy as np
 
+from random import random
+
+from pprint import pprint
+
 from util.activation_functions import Activation
 from model.classifier import Classifier
+from report.evaluator import Evaluator
+
+
+__author__ = "Simon Roesler"  # Adjust this when you copy the file
+__email__ = "uzdgn@student.kit.edu"  # Adjust this when you copy the file
+
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     level=logging.DEBUG,
                     stream=sys.stdout)
-
 
 class Perceptron(Classifier):
     """
@@ -49,55 +58,35 @@ class Perceptron(Classifier):
         self.weight = np.random.rand(self.trainingSet.input.shape[1])/100
 
     def train(self, verbose=True):
-        """Train the perceptron with the perceptron learning algorithm.
+        for i in range(0, self.epochs):
+            if (verbose):
+                print "\nEpoch:", i
+                evaluator = Evaluator()
+                evaluator.printAccuracy(self.validationSet, self.evaluate(self.validationSet.input))
+                print("\n--------")
 
-        Parameters
-        ----------
-        verbose : boolean
-            Print logging messages with validation accuracy if verbose is True.
-        """
-        
-        # Write your code to train the perceptron here
+
+            for idx, x in enumerate(self.trainingSet.input):
+                t_x = self.trainingSet.label[idx]
+                o_x = self.classify(x)
+
+                self.updateWeights(x, t_x - o_x)
+
         pass
 
     def classify(self, testInstance):
-        """Classify a single instance.
-
-        Parameters
-        ----------
-        testInstance : list of floats
-
-        Returns
-        -------
-        bool :
-            True if the testInstance is recognized as a 7, False otherwise.
-        """
-        # Write your code to do the classification on an input image
-        pass
+        return self.fire(testInstance)
 
     def evaluate(self, test=None):
-        """Evaluate a whole dataset.
-
-        Parameters
-        ----------
-        test : the dataset to be classified
-        if no test data, the test set associated to the classifier will be used
-
-        Returns
-        -------
-        List:
-            List of classified decisions for the dataset's entries.
-        """
         if test is None:
             test = self.testSet.input
-        # Once you can classify an instance, just use map for all of the test
-        # set.
+
         return list(map(self.classify, test))
 
     def updateWeights(self, input, error):
-        # Write your code to update the weights of the perceptron here
+        delta_w = self.learningRate * error * input
+        self.weight = self.weight + delta_w
         pass
          
     def fire(self, input):
-        """Fire the output of the perceptron corresponding to the input """
         return Activation.sign(np.dot(np.array(input), self.weight))
